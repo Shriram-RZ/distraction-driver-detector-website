@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload and Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 1200px;
+        }
+        .column {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 48%;
+            transition: transform 0.3s ease-in-out;
+        }
+        .column:hover {
+            transform: scale(1.02);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        form {
+            margin: 0 auto;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 20px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="file"]:hover {
+            border-color: #007bff;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            display: none; /* Hidden by default, shown with JavaScript */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .result.show {
+            display: block;
+            opacity: 1;
+        }
+        .result h2 {
+            color: #333;
+        }
+        .result p {
+            font-size: 18px;
+            color: #555;
+        }
+        .result img {
+            margin-top: 20px;
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+        .result img:hover {
+            transform: scale(1.05);
+        }
+        .loading {
+            display: none; /* Hidden by default, shown with JavaScript */
+            text-align: center;
+            margin-top: 20px;
+        }
+        .loading.show {
+            display: block;
+        }
+        .loading img {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Upload Column -->
+        <div class="column">
+            <h1>Upload a File</h1>
+            <form id="uploadForm" action="" method="post" enctype="multipart/form-data">
+                <input type="file" id="fileInput" name="file">
+                <input type="submit" value="Upload">
+            </form>
+            <div id="selectedImage" style="margin-top: 20px;">
+                <!-- Image preview will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Prediction Column -->
+        <div class="column">
+            <div id="loading" class="loading">
+                <p>Predicting...</p>
+                <img src="https://www.example.com/loading.gif" alt="Loading"> <!-- Replace with your loading animation -->
+            </div>
+            <div id="result" class="result">
+                <h2>Prediction</h2>
+                <p id="label">Label: </p>
+                <p id="probability">Probability: </p>
+                <img id="predictedImage" src="" alt="Predicted Image">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to handle image preview and form submission
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('selectedImage').innerHTML = `<img src="${e.target.result}" alt="Selected Image" style="max-width: 100%; border: 2px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            document.getElementById('loading').classList.add('show'); // Show loading animation
+
+            const formData = new FormData(this);
+            fetch('/', { // Ensure the endpoint matches
+                method: 'POST',
+                body: formData
+            }).then(response => response.json()).then(data => {
+                document.getElementById('loading').classList.remove('show'); // Hide loading animation
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    return;
+                }
+                document.getElementById('result').classList.add('show'); // Show result
+                document.getElementById('label').textContent = `Label: ${data.label}`;
+                document.getElementById('probability').textContent = `Probability: ${data.probability}`;
+                document.getElementById('predictedImage').src = `/uploads/${data.image_url}`;
+            }).catch(error => {
+                document.getElementById('loading').classList.remove('show');
+                alert('An error occurred while uploading the file.');
+            });
+        });
+    </script>
+</body>
+</html>
