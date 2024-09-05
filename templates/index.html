@@ -2,93 +2,206 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>File Upload and Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distracted Driver Prediction</title>
     <style>
-        /* Your styles here */
+        /* Global Styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f1f6;
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+            color: #333;
         }
+
+        .navbar {
+            width: 100%;
+            background-color: #5468ff;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 24px;
+            font-weight: bold;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
         .container {
             display: flex;
             justify-content: space-between;
             width: 90%;
             max-width: 1200px;
-        }
-        .column {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            width: 48%;
-        }
-        h1 {
-            color: #333;
+            margin-top: 60px; /* Adjusted for navbar height */
             margin-bottom: 20px;
         }
-        form {
-            margin: 0 auto;
+
+        .column {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            width: 45%;
+            text-align: center;
+            transition: box-shadow 0.3s ease;
         }
+
+        .column:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        h1, h2 {
+            color: #222;
+            margin-bottom: 20px;
+        }
+
         input[type="file"] {
             display: block;
             margin: 0 auto 20px;
             padding: 10px;
             border: 2px solid #ddd;
-            border-radius: 5px;
+            border-radius: 6px;
+            width: calc(100% - 20px); /* Adjusted width */
+            background: #fafafa;
+            transition: border-color 0.3s ease;
         }
-        input[type="submit"] {
-            background-color: #007bff;
+
+        input[type="file"]:hover {
+            border-color: #5468ff;
+        }
+
+        .button-29 {
+            background-color: #5468ff;
+            color: #ffffff;
+            padding: 12px 24px;
             border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .result {
+
+        .button-29:hover {
+            background-color: #4054d2;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        video {
+            max-width: 100%;
+            border-radius: 12px;
             margin-top: 20px;
-            display: none;
-            position: relative;
         }
-        .result.show {
+
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            background: #f8f8f8;
+            display: none;
+            text-align: left;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            position: relative; /* Position relative for close button */
+        }
+
+        #result.show {
             display: block;
         }
+
         .close-button {
+            background: #5468ff;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
             position: absolute;
             top: 10px;
             right: 10px;
-            background: #ff5c5c;
-            border: none;
-            color: white;
-            padding: 5px 10px;
             border-radius: 50%;
-            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .close-button:hover {
+            background: #4054d2;
+        }
+
+        .prediction {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .prediction-status {
             font-size: 16px;
-            line-height: 1;
+            color: #ff4d4d; /* For "Yes" status */
+            font-weight: bold;
         }
-        .result img, .result video {
-            margin-top: 20px;
+
+        .column img {
             max-width: 100%;
-            border: 2px solid #ddd;
-            border-radius: 10px;
+            border-radius: 12px;
         }
-        #selectedImage img {
-            max-width: 50%; /* Smaller image preview */
+
+        .column video {
+            max-width: 100%;
+        }
+
+        #framePrediction {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .frame-item {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .timestamp {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .prediction-label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .prediction-probability {
+            font-size: 14px;
+            color: #666;
         }
     </style>
 </head>
 <body>
+    <div class="navbar">
+        Distracted Driver Prediction
+    </div>
     <div class="container">
         <!-- Upload Column -->
         <div class="column">
-            <h1>Upload a File</h1>
+            <h1>Distracted Driver Detection</h1>
             <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
                 <input type="file" id="fileInput" name="file" accept="image/*,video/*">
-                <input type="submit" value="Upload">
+                <input type="submit" value="Upload" class="button-29">
             </form>
             <div id="selectedImage" style="margin-top: 20px;">
                 <!-- Image preview will be displayed here -->
@@ -99,24 +212,29 @@
         <div class="column">
             <div id="loading" class="loading" style="display:none;">
                 <p>Predicting...</p>
-                <img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading">
+                <img src="{{ url_for('static', filename='images/loading.gif') }}" alt="Loading">
             </div>
             <div id="result" class="result">
                 <button class="close-button" onclick="closeResult()">×</button>
                 <h2>Prediction</h2>
                 <p id="label">Label: </p>
                 <p id="probability">Probability: </p>
+                <p id="status" class="prediction-status"></p>
                 <img id="predictedImage" src="" alt="Predicted Image" style="display:none;">
-                <video id="predictedVideo" controls style="display:none; max-width: 100%;">
+                <video id="predictedVideo" controls style="display:none; max-width: 100%;" ontimeupdate="updatePrediction()">
                     <source src="" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
+                <div id="framePrediction" style="margin-top: 20px;"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // JavaScript to handle image preview and form submission
+        let predictions = []; // To store predictions
+        let videoElement = document.getElementById('predictedVideo');
+        let framePredictionElement = document.getElementById('framePrediction');
+
         document.getElementById('fileInput').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
@@ -127,7 +245,7 @@
                         document.getElementById('selectedImage').innerHTML = `<img src="${e.target.result}" alt="Selected Image">`;
                     } else if (fileType === 'video') {
                         document.getElementById('selectedImage').innerHTML = `
-                            <video controls style="max-width: 50%;">
+                            <video controls style="max-width: 100%;">
                                 <source src="${e.target.result}" type="${file.type}">
                                 Your browser does not support the video tag.
                             </video>`;
@@ -160,23 +278,74 @@
                     document.getElementById('predictedImage').src = `/uploads/${data.file_url}`;
                     document.getElementById('predictedImage').style.display = 'block';
                     document.getElementById('predictedVideo').style.display = 'none';
+                    framePredictionElement.style.display = 'none';
                 } else if (data.file_type === 'video') {
                     document.getElementById('label').textContent = '';
                     document.getElementById('probability').textContent = '';
-                    document.getElementById('predictedVideo').src = `/uploads/${data.file_url}`;
-                    document.getElementById('predictedVideo').style.display = 'block';
+                    videoElement.src = `/uploads/${data.file_url}`;
+                    videoElement.style.display = 'block';
                     document.getElementById('predictedImage').style.display = 'none';
+                    framePredictionElement.style.display = 'block';
+
+                    // Fetch and store frame predictions
+                    fetch(`/uploads/${data.file_url.replace('.mp4', '_predictions.json')}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            predictions = data;
+                        }).catch(error => {
+                            console.error('Error fetching predictions:', error);
+                        });
                 }
+
+                // Set the distraction status based on the prediction
+                const status = data.label === 'safe_driving' ? 'Distracted Driver: No' : 'Distracted Driver: Yes';
+                document.getElementById('status').textContent = status;
             }).catch(error => {
                 document.getElementById('loading').style.display = 'none';
                 alert('An error occurred while uploading the file.');
             });
         });
 
+        function updatePrediction() {
+            const currentTime = videoElement.currentTime;
+            
+            // Clear previous predictions
+            framePredictionElement.innerHTML = '';
+
+            // Generate a list of predictions with timestamps
+            predictions.forEach(prediction => {
+                const timestamp = prediction.timestamp; // Ensure predictions include timestamp
+                const predictionLabel = prediction.label;
+                const predictionProbability = (prediction.probability * 100).toFixed(2);
+
+                const predictionItem = document.createElement('div');
+                predictionItem.className = 'frame-item';
+
+                const timestampElem = document.createElement('div');
+                timestampElem.className = 'timestamp';
+                timestampElem.textContent = `Time: ${timestamp}s`;
+
+                const labelElem = document.createElement('div');
+                labelElem.className = 'prediction-label';
+                labelElem.textContent = `Label: ${predictionLabel}`;
+
+                const probabilityElem = document.createElement('div');
+                probabilityElem.className = 'prediction-probability';
+                probabilityElem.textContent = `Probability: ${predictionProbability}%`;
+
+                predictionItem.appendChild(timestampElem);
+                predictionItem.appendChild(labelElem);
+                predictionItem.appendChild(probabilityElem);
+
+                framePredictionElement.appendChild(predictionItem);
+            });
+        }
+
         function closeResult() {
             document.getElementById('result').classList.remove('show');
             document.getElementById('predictedImage').src = '';
-            document.getElementById('predictedVideo').src = '';
+            videoElement.src = '';
+            framePredictionElement.innerHTML = '';
         }
     </script>
 </body>
