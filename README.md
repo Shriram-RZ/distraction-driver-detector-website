@@ -34,6 +34,9 @@ Copy code
 pip install keras
 pip install flask
 pip install tensorflow
+pip install opencv-python
+pip install Pillow
+
 ```
 These commands will install the Keras, Flask, and TensorFlow libraries.
 
